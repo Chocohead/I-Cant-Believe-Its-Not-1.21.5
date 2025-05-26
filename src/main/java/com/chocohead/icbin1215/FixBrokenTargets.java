@@ -133,6 +133,23 @@ public class FixBrokenTargets implements MixinAnnotationAdjuster {
 			});
 			break;
 		}
+		case "net.pitan76.mcpitanlib.mixin.MinecraftServerTimer": {
+			if (!annotation.is(Inject.class)) break; //Some other kind of injector
+			AdjustableInjectNode inject = annotation.as(AdjustableInjectNode.class);
+			if (!inject.getMethod().contains("tick")) break; //Some other injection
+
+			inject.applyRefmap();
+			annotation = inject.withMethod(methods -> {
+				assert methods.size() == 1: methods;
+				String method = methods.get(0);
+
+				assert "Lnet/minecraft/server/MinecraftServer;method_3748(Ljava/util/function/BooleanSupplier;)V".equals(method): method;
+				methods.set(0, method.replace("(L", "(Lnet/minecraft/class_10961;L"));
+
+				return methods;
+			});
+			break;
+		}
 		}
 
 		return annotation;
